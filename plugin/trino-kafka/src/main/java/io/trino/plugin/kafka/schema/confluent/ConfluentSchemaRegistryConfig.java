@@ -16,6 +16,7 @@ package io.trino.plugin.kafka.schema.confluent;
 import com.google.common.collect.ImmutableSet;
 import io.airlift.configuration.Config;
 import io.airlift.configuration.ConfigDescription;
+import io.airlift.configuration.ConfigSecuritySensitive;
 import io.airlift.units.Duration;
 import io.airlift.units.MaxDuration;
 import io.airlift.units.MinDuration;
@@ -27,6 +28,7 @@ import jakarta.validation.constraints.Size;
 import java.util.Set;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static io.trino.plugin.kafka.schema.confluent.ConfluentSchemaRegistryAuthType.NONE;
 import static io.trino.plugin.kafka.schema.confluent.EmptyFieldStrategy.IGNORE;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -36,6 +38,9 @@ public class ConfluentSchemaRegistryConfig
     private int confluentSchemaRegistryClientCacheSize = 1000;
     private EmptyFieldStrategy emptyFieldStrategy = IGNORE;
     private Duration confluentSubjectsCacheRefreshInterval = new Duration(1, SECONDS);
+    private ConfluentSchemaRegistryAuthType authenticationType = NONE;
+    private String authenticationUsername;
+    private String authenticationPassword;
 
     @Size(min = 1)
     public Set<HostAddress> getConfluentSchemaRegistryUrls()
@@ -93,6 +98,46 @@ public class ConfluentSchemaRegistryConfig
     public ConfluentSchemaRegistryConfig setConfluentSubjectsCacheRefreshInterval(Duration confluentSubjectsCacheRefreshInterval)
     {
         this.confluentSubjectsCacheRefreshInterval = confluentSubjectsCacheRefreshInterval;
+        return this;
+    }
+
+    public ConfluentSchemaRegistryAuthType getAuthenticationType()
+    {
+        return authenticationType;
+    }
+
+    @Config("kafka.confluent-schema-registry.authentication.type")
+    @ConfigDescription("Authentication type for the Confluent Schema Registry")
+    public ConfluentSchemaRegistryConfig setAuthenticationType(ConfluentSchemaRegistryAuthType authenticationType)
+    {
+        this.authenticationType = authenticationType;
+        return this;
+    }
+
+    public String getAuthenticationUsername()
+    {
+        return authenticationUsername;
+    }
+
+    @Config("kafka.confluent-schema-registry.authentication.username")
+    @ConfigDescription("Username for Confluent Schema Registry basic authentication")
+    public ConfluentSchemaRegistryConfig setAuthenticationUsername(String authenticationUsername)
+    {
+        this.authenticationUsername = authenticationUsername;
+        return this;
+    }
+
+    public String getAuthenticationPassword()
+    {
+        return authenticationPassword;
+    }
+
+    @Config("kafka.confluent-schema-registry.authentication.password")
+    @ConfigDescription("Password for Confluent Schema Registry basic authentication")
+    @ConfigSecuritySensitive
+    public ConfluentSchemaRegistryConfig setAuthenticationPassword(String authenticationPassword)
+    {
+        this.authenticationPassword = authenticationPassword;
         return this;
     }
 

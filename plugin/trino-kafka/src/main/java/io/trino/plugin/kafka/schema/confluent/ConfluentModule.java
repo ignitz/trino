@@ -89,6 +89,12 @@ public class ConfluentModule
                 .addBinding()
                 .to(SchemaRegistryClientTtlProvider.class)
                 .in(SINGLETON);
+        if (buildConfigObject(ConfluentSchemaRegistryConfig.class).getAuthenticationType() == ConfluentSchemaRegistryAuthType.PASSWORD) {
+            newSetBinder(binder, SchemaRegistryClientPropertiesProvider.class)
+                    .addBinding()
+                    .to(SchemaRegistryClientBasicAuthProvider.class)
+                    .in(SINGLETON);
+        }
         newSetBinder(binder, SchemaProvider.class).addBinding().to(AvroSchemaProvider.class).in(Scopes.SINGLETON);
         // Each SchemaRegistry object should have a new instance of SchemaProvider
         newSetBinder(binder, SchemaProvider.class).addBinding().to(LazyLoadedProtobufSchemaProvider.class);

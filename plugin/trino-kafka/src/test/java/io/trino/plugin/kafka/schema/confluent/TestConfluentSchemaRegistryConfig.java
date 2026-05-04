@@ -23,6 +23,8 @@ import java.util.Map;
 import static io.airlift.configuration.testing.ConfigAssertions.assertFullMapping;
 import static io.airlift.configuration.testing.ConfigAssertions.assertRecordedDefaults;
 import static io.airlift.configuration.testing.ConfigAssertions.recordDefaults;
+import static io.trino.plugin.kafka.schema.confluent.ConfluentSchemaRegistryAuthType.NONE;
+import static io.trino.plugin.kafka.schema.confluent.ConfluentSchemaRegistryAuthType.PASSWORD;
 import static io.trino.plugin.kafka.schema.confluent.EmptyFieldStrategy.IGNORE;
 import static io.trino.plugin.kafka.schema.confluent.EmptyFieldStrategy.MARK;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -36,7 +38,10 @@ public class TestConfluentSchemaRegistryConfig
                 .setConfluentSchemaRegistryUrls(ImmutableSet.of())
                 .setConfluentSchemaRegistryClientCacheSize(1000)
                 .setEmptyFieldStrategy(IGNORE)
-                .setConfluentSubjectsCacheRefreshInterval(new Duration(1, SECONDS)));
+                .setConfluentSubjectsCacheRefreshInterval(new Duration(1, SECONDS))
+                .setAuthenticationType(NONE)
+                .setAuthenticationUsername(null)
+                .setAuthenticationPassword(null));
     }
 
     @Test
@@ -47,13 +52,19 @@ public class TestConfluentSchemaRegistryConfig
                 .put("kafka.confluent-schema-registry-client-cache-size", "1500")
                 .put("kafka.empty-field-strategy", "MARK")
                 .put("kafka.confluent-subjects-cache-refresh-interval", "2s")
+                .put("kafka.confluent-schema-registry.authentication.type", "PASSWORD")
+                .put("kafka.confluent-schema-registry.authentication.username", "examplename")
+                .put("kafka.confluent-schema-registry.authentication.password", "examplepassword")
                 .buildOrThrow();
 
         ConfluentSchemaRegistryConfig expected = new ConfluentSchemaRegistryConfig()
                 .setConfluentSchemaRegistryUrls(ImmutableSet.of("http://schema-registry-a:8081", "http://schema-registry-b:8081"))
                 .setConfluentSchemaRegistryClientCacheSize(1500)
                 .setEmptyFieldStrategy(MARK)
-                .setConfluentSubjectsCacheRefreshInterval(new Duration(2, SECONDS));
+                .setConfluentSubjectsCacheRefreshInterval(new Duration(2, SECONDS))
+                .setAuthenticationType(PASSWORD)
+                .setAuthenticationUsername("examplename")
+                .setAuthenticationPassword("examplepassword");
 
         assertFullMapping(properties, expected);
     }
